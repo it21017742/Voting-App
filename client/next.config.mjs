@@ -4,8 +4,8 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
-  basePath: "/Voting-App",
-  assetPrefix: "/Voting-App",
+  basePath: process.env.NODE_ENV === "production" ? "/Voting-App" : "",
+  assetPrefix: process.env.NODE_ENV === "production" ? "/Voting-App/" : "",
 };
 
 export default nextConfig;
