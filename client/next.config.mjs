@@ -4,6 +4,8 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
+  basePath: "/Voting-App",
+  assetPrefix: "/Voting-App",
 };
 
 export default nextConfig;
