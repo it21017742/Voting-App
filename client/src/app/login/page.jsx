@@ -2,6 +2,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 
+
 function LoginForm() {
   const [formData, setFormData] = useState({
     email: "",
@@ -85,7 +86,7 @@ function LoginForm() {
         </button>
         <p style={{ marginTop: "10px", textAlign: "center", color: "#666" }}>
           Don't have an account?{" "}
-          <Link href="/blogs" style={{ color: "#800000", textDecoration: "underline" }}>
+          <Link href="/signup" style={{ color: "#800000", textDecoration: "underline" }}>
             Sign Up
           </Link>
         </p>

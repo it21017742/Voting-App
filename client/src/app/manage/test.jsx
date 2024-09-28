@@ -1,22 +1,9 @@
-"use client";
-import React, { useState, useEffect } from "react";
-
 function VotingPage() {
   const [polls, setPolls] = useState([]);
   const [selectedPoll, setSelectedPoll] = useState(null);
   const [votes, setVotes] = useState({});
   const [submittedPolls, setSubmittedPolls] = useState([]);
   const [userId, setUserId] = useState(null);
-
-  const fetchPolls = async () => {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/votes`);
-    const data = await response.json();
-    setPolls(data);
-    if (userId) {
-      const submitted = data.filter((poll) => poll.votedBy.includes(userId)).map((poll) => poll._id);
-      setSubmittedPolls(submitted);
-    }
-  };
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -28,49 +15,42 @@ function VotingPage() {
         .then((data) => setUserId(data._id));
     }
 
-    fetchPolls();
-  }, [userId]);
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/votes`)
+      .then((response) => response.json())
+      .then((data) => setPolls(data));
+  }, []);
 
   const handleVoteChange = (pollId, answer) => {
     setVotes((prevVotes) => {
-      if (polls.find((poll) => poll._id === pollId).type === "single") {
-        return { ...prevVotes, [pollId]: answer };
+      const currentVotes = prevVotes[pollId] || [];
+      if (currentVotes.includes(answer)) {
+        return {
+          ...prevVotes,
+          [pollId]: currentVotes.filter((a) => a !== answer),
+        };
       } else {
-        const currentVotes = prevVotes[pollId] || [];
-        if (currentVotes.includes(answer)) {
-          return {
-            ...prevVotes,
-            [pollId]: currentVotes.filter((a) => a !== answer),
-          };
-        } else {
-          return {
-            ...prevVotes,
-            [pollId]: [...currentVotes, answer],
-          };
-        }
+        return {
+          ...prevVotes,
+          [pollId]: [...currentVotes, answer],
+        };
       }
     });
   };
 
- const handleVote = async (pollId) => {
-   const token = localStorage.getItem("token");
-   const pollType = polls.find((poll) => poll._id === pollId).type;
-   const voteData = pollType === "single" ? votes[pollId] : votes[pollId] || [];
-
-   const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/vote/${pollId}`, {
-     method: "POST",
-     headers: {
-       "Content-Type": "application/json",
-       Authorization: `Bearer ${token}`,
-     },
-     body: JSON.stringify({ vote: voteData }),
-   });
-   if (response.ok) {
-     setSubmittedPolls((prev) => [...prev, pollId]);
-     // Refresh the polls data after voting
-     fetchPolls();
-   }
- };
+  const handleVote = async (pollId) => {
+    const token = localStorage.getItem("token");
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/vote/${pollId}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ vote: votes[pollId] }),
+    });
+    if (response.ok) {
+      setSubmittedPolls((prev) => [...prev, pollId]);
+    }
+  };
 
   return (
     <div className="flex justify-center items-center min-h-screen bg-gradient-to-r from-[#e0f7fa] to-[#80deea] p-6">
@@ -88,7 +68,7 @@ function VotingPage() {
                     name={`vote-${poll._id}`}
                     value={answer.text}
                     onChange={() => handleVoteChange(poll._id, answer.text)}
-                    disabled={submittedPolls.includes(poll._id)}
+                    disabled={submittedPolls.includes(poll._id) || poll.votedBy.includes(userId)}
                     className="mr-2"
                   />
                   {answer.text}
@@ -98,7 +78,7 @@ function VotingPage() {
             <button
               onClick={() => handleVote(poll._id)}
               className={`w-full p-2 rounded mt-4 ${submittedPolls.includes(poll._id) ? "bg-gray-500" : "bg-[#800000] text-white"}`}
-              disabled={submittedPolls.includes(poll._id)}
+              disabled={submittedPolls.includes(poll._id) || poll.votedBy.includes(userId)}
             >
               {submittedPolls.includes(poll._id) ? "Submitted" : "Submit Vote"}
             </button>
