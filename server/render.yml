@@ -1,8 +1,8 @@
    services:
      - type: web
        name: Voting App
-       env: node
-       buildCommand: npm ci && npm rebuild bcrypt --build-from-source
+       env: node       
+       buildCommand: npm ci
        startCommand: node server.js
        envVars:
          - key: NODE_ENV

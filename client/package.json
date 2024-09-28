@@ -10,6 +10,7 @@
     "export": "next build && next export"
   },
   "dependencies": {
+    "bcryptjs": "^2.4.3",
     "chart.js": "^4.4.4",
     "next": "14.2.13",
     "react": "^18",
