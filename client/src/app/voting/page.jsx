@@ -20,13 +20,15 @@ function VotingPage() {
 
   useEffect(() => {
     const token = localStorage.getItem("token");
-    if (token) {
-      fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users/me`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-        .then((response) => response.json())
-        .then((data) => setUserId(data._id));
+    if (!token) {
+      window.location.href = "/Voting-App/login"; // Redirect to login if no token
+      return;
     }
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users/me`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then((response) => response.json())
+      .then((data) => setUserId(data._id));
 
     fetchPolls();
   }, [userId]);
@@ -52,25 +54,25 @@ function VotingPage() {
     });
   };
 
- const handleVote = async (pollId) => {
-   const token = localStorage.getItem("token");
-   const pollType = polls.find((poll) => poll._id === pollId).type;
-   const voteData = pollType === "single" ? votes[pollId] : votes[pollId] || [];
+  const handleVote = async (pollId) => {
+    const token = localStorage.getItem("token");
+    const pollType = polls.find((poll) => poll._id === pollId).type;
+    const voteData = pollType === "single" ? votes[pollId] : votes[pollId] || [];
 
-   const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/vote/${pollId}`, {
-     method: "POST",
-     headers: {
-       "Content-Type": "application/json",
-       Authorization: `Bearer ${token}`,
-     },
-     body: JSON.stringify({ vote: voteData }),
-   });
-   if (response.ok) {
-     setSubmittedPolls((prev) => [...prev, pollId]);
-     // Refresh the polls data after voting
-     fetchPolls();
-   }
- };
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/vote/${pollId}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ vote: voteData }),
+    });
+    if (response.ok) {
+      setSubmittedPolls((prev) => [...prev, pollId]);
+      // Refresh the polls data after voting
+      fetchPolls();
+    }
+  };
 
   return (
     <div className="flex justify-center items-center min-h-screen bg-gradient-to-r from-[#e0f7fa] to-[#80deea] p-6">
