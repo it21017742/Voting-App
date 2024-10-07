@@ -28,7 +28,7 @@ function LoginForm() {
       // Store the token in local storage or context
       localStorage.setItem("token", data.token);
       // Redirect to the voting page
-      window.location.href = "/voting";
+      window.location.href = "/Voting-App/voting";
     } else {
       console.error("Login failed");
     }
